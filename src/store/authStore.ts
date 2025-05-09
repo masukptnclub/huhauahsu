@@ -96,26 +96,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (email, password, fullName) => {
     try {
       set({ isLoading: true, error: null });
+      
+      // First create the auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-            is_admin: false
-          },
-        },
       });
 
       if (error) throw error;
 
-      if (data.session) {
-        set({ 
-          session: data.session, 
-          user: data.session.user,
-          isAdmin: false,
-          isLoading: false 
-        });
+      if (data.user) {
+        // Then update the profile with additional information
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: fullName,
+            username: email.split('@')[0], // Generate a default username from email
+            email: email,
+            is_admin: false,
+          })
+          .eq('id', data.user.id);
+
+        if (profileError) throw profileError;
+
+        if (data.session) {
+          set({ 
+            session: data.session, 
+            user: data.session.user,
+            isAdmin: false,
+            isLoading: false 
+          });
+        }
       }
     } catch (error) {
       console.error('Registration error:', error);
