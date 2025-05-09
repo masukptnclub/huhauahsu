@@ -86,6 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false, 
         error: error instanceof Error ? error.message : 'Login failed. Please try again.'
       });
+      throw error;
     }
   },
 
@@ -136,6 +137,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false, 
         error: error instanceof Error ? error.message : 'Registration failed. Please try again.'
       });
+      throw error;
     }
   },
 
@@ -158,6 +160,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false, 
         error: error instanceof Error ? error.message : 'Logout failed. Please try again.'
       });
+      throw error;
     }
   },
 }));

@@ -20,7 +20,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login, register, isAdmin } = useAuthStore();
+  const { login, register } = useAuthStore();
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
