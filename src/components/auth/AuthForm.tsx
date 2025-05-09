@@ -47,8 +47,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
             .eq('id', data.user.id)
             .single();
 
+          // Navigate based on user role
           if (profile?.is_admin) {
-            navigate('/admin');
+            navigate('/admin/dashboard');
           } else {
             navigate('/user/dashboard');
           }
