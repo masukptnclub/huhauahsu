@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user: session.user,
           isAdmin: profile?.is_admin || false,
           isLoading: false,
-          error: null // Clear any previous errors
+          error: null
         });
       } else {
         set({ session: null, user: null, isAdmin: false, isLoading: false, error: null });
@@ -102,6 +102,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         options: {
           data: {
             full_name: fullName,
+            is_admin: false
           },
         },
       });

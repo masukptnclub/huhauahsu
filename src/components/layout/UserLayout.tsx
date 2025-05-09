@@ -11,13 +11,15 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
+import { useAuthStore } from '../../store/authStore';
 
 export const UserLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logout();
     navigate('/login');
   };
 
