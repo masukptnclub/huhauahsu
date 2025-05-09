@@ -34,16 +34,31 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
 
     try {
       if (mode === 'login') {
-        await login(email, password);
-        const { isAdmin } = useAuthStore.getState();
+        const { error: loginError, data } = await login(email, password);
+        if (loginError) throw loginError;
+        
+        // Get the user's profile to check admin status
+        const { data: profile } = await useAuthStore.getState().supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', data.user?.id)
+          .single();
+
+        const isAdmin = profile?.is_admin ?? false;
         navigate(isAdmin ? '/admin' : '/user/dashboard');
       } else {
-        await register(email, password, fullName);
+        const { error: registerError } = await register(email, password, fullName);
+        if (registerError) throw registerError;
+        
         navigate('/user/dashboard');
       }
     } catch (err) {
       console.error('Authentication error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during authentication');
+      setError(
+        err.message === 'Invalid login credentials'
+          ? 'Invalid email or password'
+          : err.message || 'An error occurred during authentication'
+      );
     } finally {
       setLoading(false);
     }
@@ -90,7 +105,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
             required
             leftIcon={<Lock className="h-5 w-5 text-gray-400" />}
           />
-          {error && <p className="text-error-600 text-sm">{error}</p>}
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <Button
             type="submit"
             className="w-full"
