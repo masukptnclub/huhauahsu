@@ -1,10 +1,6 @@
 import { create } from 'zustand';
-
-interface User {
-  id: string;
-  email: string;
-  isAdmin: boolean;
-}
+import { storage } from '../lib/storage';
+import type { User } from '../types';
 
 interface AuthState {
   user: User | null;
@@ -28,10 +24,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
 
   initialize: () => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = storage.get('user');
     if (storedUser) {
-      const user = JSON.parse(storedUser);
-      set({ user, isAdmin: user.isAdmin, isLoading: false });
+      set({ user: storedUser, isAdmin: storedUser.isAdmin, isLoading: false });
     } else {
       set({ user: null, isAdmin: false, isLoading: false });
     }
@@ -43,23 +38,25 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       // Mock authentication
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        const adminUser = {
+        const adminUser: User = {
           id: '1',
           email: ADMIN_EMAIL,
-          isAdmin: true
+          isAdmin: true,
+          fullName: 'Admin User'
         };
-        localStorage.setItem('user', JSON.stringify(adminUser));
+        storage.set('user', adminUser);
         set({ user: adminUser, isAdmin: true, isLoading: false });
         return { data: adminUser, error: null };
       }
 
       // Mock regular user authentication
-      const user = {
-        id: '2',
+      const user: User = {
+        id: Math.random().toString(36).substr(2, 9),
         email,
-        isAdmin: false
+        isAdmin: false,
+        fullName: email.split('@')[0]
       };
-      localStorage.setItem('user', JSON.stringify(user));
+      storage.set('user', user);
       set({ user, isAdmin: false, isLoading: false });
       return { data: user, error: null };
     } catch (error) {
@@ -76,13 +73,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true, error: null });
       
       // Mock user registration
-      const user = {
+      const user: User = {
         id: Math.random().toString(36).substr(2, 9),
         email,
-        isAdmin: false
+        isAdmin: false,
+        fullName
       };
       
-      localStorage.setItem('user', JSON.stringify(user));
+      storage.set('user', user);
       set({ user, isAdmin: false, isLoading: false });
       return { data: user, error: null };
     } catch (error) {
@@ -95,7 +93,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('user');
+    storage.remove('user');
     set({ user: null, isAdmin: false });
   },
 }));
