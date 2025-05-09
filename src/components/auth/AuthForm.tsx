@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { useAuthStore } from '../../store/authStore';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/Card';
@@ -20,6 +20,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login, register, isAdmin } = useAuthStore();
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
@@ -33,52 +34,13 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
 
     try {
       if (mode === 'login') {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', data.user.id)
-            .single();
-
-          // Navigate based on user role
-          if (profile?.is_admin) {
-            navigate('/admin/dashboard');
-          } else {
-            navigate('/user/dashboard');
-          }
-        }
+        await login(email, password);
+        // Get the latest isAdmin value after login
+        const { isAdmin } = useAuthStore.getState();
+        navigate(isAdmin ? '/admin/dashboard' : '/user/dashboard');
       } else {
-        // First, create the auth user
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (signUpError) throw signUpError;
-
-        if (authData.user) {
-          // Then update the profile with additional information
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({
-              full_name: fullName,
-              username: email.split('@')[0], // Generate a default username from email
-              email: email,
-              is_admin: false,
-            })
-            .eq('id', authData.user.id);
-
-          if (profileError) throw profileError;
-
-          navigate('/user/dashboard');
-        }
+        await register(email, password, fullName);
+        navigate('/user/dashboard');
       }
     } catch (err) {
       console.error('Authentication error:', err);

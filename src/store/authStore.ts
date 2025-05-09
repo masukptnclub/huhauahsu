@@ -26,20 +26,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', session.user.id)
           .single();
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-        }
-
         set({ 
           session, 
           user: session.user,
-          isAdmin: profile?.is_admin || false,
+          isAdmin: Boolean(profile?.is_admin),
           isLoading: false,
           error: null
         });
@@ -80,7 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ 
           session: data.session, 
           user: data.session.user,
-          isAdmin: profile?.is_admin || false,
+          isAdmin: Boolean(profile?.is_admin),
           isLoading: false 
         });
       }
@@ -101,6 +97,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            is_admin: false
+          }
+        }
       });
 
       if (error) throw error;
