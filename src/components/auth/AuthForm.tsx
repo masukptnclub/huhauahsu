@@ -40,18 +40,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
 
         if (error) throw error;
 
-        // Check if user exists and has admin status
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', data.user?.id)
-          .single();
+        if (data.user) {
+          // Check if user exists and has admin status
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.user.id)
+            .single();
 
-        // Navigate based on user role
-        if (profile?.is_admin) {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
+          // Navigate based on user role
+          if (profile?.is_admin) {
+            navigate('/admin');
+          } else {
+            navigate('/user/dashboard');
+          }
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -67,7 +69,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
         if (error) throw error;
 
         if (data.user) {
-          navigate('/dashboard');
+          navigate('/user/dashboard');
         }
       }
     } catch (err) {
