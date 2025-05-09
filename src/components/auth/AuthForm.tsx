@@ -35,9 +35,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
     try {
       if (mode === 'login') {
         await login(email, password);
-        // Get the latest isAdmin value after login
         const { isAdmin } = useAuthStore.getState();
-        navigate(isAdmin ? '/admin/dashboard' : '/user/dashboard');
+        navigate(isAdmin ? '/admin' : '/user/dashboard');
       } else {
         await register(email, password, fullName);
         navigate('/user/dashboard');
