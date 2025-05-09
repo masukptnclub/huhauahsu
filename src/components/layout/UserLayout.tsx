@@ -35,9 +35,9 @@ export const UserLayout: React.FC = () => {
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            <NavItem to="/dashboard" icon={<Home size={18} />} label="Dashboard" exact />
-            <NavItem to="/tryouts" icon={<FileText size={18} />} label="Try Out" />
-            <NavItem to="/profile" icon={<User size={18} />} label="Profile" />
+            <NavItem to="/user/dashboard" icon={<Home size={18} />} label="Dashboard" exact />
+            <NavItem to="/user/tryouts" icon={<FileText size={18} />} label="Try Out" />
+            <NavItem to="/user/profile" icon={<User size={18} />} label="Profile" />
           </ul>
         </nav>
         <div className="p-4 border-t border-gray-100">
@@ -72,9 +72,9 @@ export const UserLayout: React.FC = () => {
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            <MobileNavItem to="/dashboard" icon={<Home size={18} />} label="Dashboard" onClick={toggleSidebar} exact />
-            <MobileNavItem to="/tryouts" icon={<FileText size={18} />} label="Try Out" onClick={toggleSidebar} />
-            <MobileNavItem to="/profile" icon={<User size={18} />} label="Profile" onClick={toggleSidebar} />
+            <MobileNavItem to="/user/dashboard" icon={<Home size={18} />} label="Dashboard" onClick={toggleSidebar} exact />
+            <MobileNavItem to="/user/tryouts" icon={<FileText size={18} />} label="Try Out" onClick={toggleSidebar} />
+            <MobileNavItem to="/user/profile" icon={<User size={18} />} label="Profile" onClick={toggleSidebar} />
           </ul>
         </nav>
         <div className="p-4 border-t border-gray-100">
