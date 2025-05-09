@@ -9,8 +9,8 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   initialize: () => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, fullName: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ data: any; error: Error | null; }>;
+  register: (email: string, password: string, fullName: string) => Promise<{ data: any; error: Error | null; }>;
   logout: () => Promise<void>;
 }
 
@@ -64,7 +64,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        set({ isLoading: false });
+        return { data: null, error };
+      }
 
       if (data.session) {
         const { data: profile } = await supabase
@@ -79,14 +82,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isAdmin: Boolean(profile?.is_admin),
           isLoading: false 
         });
+        return { data, error: null };
       }
+      
+      return { data: null, error: new Error('No session created') };
     } catch (error) {
       console.error('Login error:', error);
-      set({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Login failed. Please try again.'
-      });
-      throw error;
+      set({ isLoading: false });
+      return { 
+        data: null, 
+        error: error instanceof Error ? error : new Error('Login failed. Please try again.')
+      };
     }
   },
 
@@ -94,7 +100,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // First create the auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -106,21 +111,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        set({ isLoading: false });
+        return { data: null, error };
+      }
 
       if (data.user) {
-        // Then update the profile with additional information
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
             full_name: fullName,
-            username: email.split('@')[0], // Generate a default username from email
+            username: email.split('@')[0],
             email: email,
             is_admin: false,
           })
           .eq('id', data.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          set({ isLoading: false });
+          return { data: null, error: profileError };
+        }
 
         if (data.session) {
           set({ 
@@ -129,15 +139,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isAdmin: false,
             isLoading: false 
           });
+          return { data, error: null };
         }
       }
+      
+      set({ isLoading: false });
+      return { data: null, error: new Error('Registration failed') };
     } catch (error) {
       console.error('Registration error:', error);
-      set({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Registration failed. Please try again.'
-      });
-      throw error;
+      set({ isLoading: false });
+      return { 
+        data: null, 
+        error: error instanceof Error ? error : new Error('Registration failed. Please try again.')
+      };
     }
   },
 

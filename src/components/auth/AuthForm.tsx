@@ -55,9 +55,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login' }) => 
     } catch (err) {
       console.error('Authentication error:', err);
       setError(
-        err.message === 'Invalid login credentials'
+        err?.message === 'Invalid login credentials'
           ? 'Invalid email or password'
-          : err.message || 'An error occurred during authentication'
+          : err?.message || 'An error occurred during authentication'
       );
     } finally {
       setLoading(false);
